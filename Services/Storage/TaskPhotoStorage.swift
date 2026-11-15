@@ -62,9 +62,14 @@ public enum TaskPhotoStorage {
         ) else {
             return []
         }
-        return contents.filter { url in
-            (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) > 0
+        var validFiles: [URL] = []
+        for url in contents {
+            let values = try? url.resourceValues(forKeys: [.fileSizeKey])
+            if let size = values?.fileSize, size > 0 {
+                validFiles.append(url)
+            }
         }
+        return validFiles
     }
 
     public static func resolvePhotoPath(_ pathOrName: String) -> String {

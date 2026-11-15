@@ -586,8 +586,8 @@ public struct NotebookMainView: View {
                                     onEdit: {
                                         editingTask = task
                                     },
-                                    onDelete: { deleteTask(task) },
                                     onMoveToTomorrow: { moveTaskTomorrow(task) },
+                                    onDelete: { deleteTask(task) },
                                     onOpenPhotos: { photos in
                                         activeLightboxPhotos = photos
                                         activeLightboxIndex = 0

@@ -267,7 +267,7 @@ public struct NutritionWeightView: View {
                             // Empty State quick-add banner when no meals logged yet for the day
                             if todayMeals.isEmpty {
                                 Button {
-                                    MiodiHapticFeedback.light()
+                                    MiodiHapticFeedback.lightClick()
                                     selectedCategoryForAdd = currentMealTypeByTime()
                                     isAddFoodOpen = true
                                 } label: {
