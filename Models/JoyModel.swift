@@ -89,14 +89,14 @@ public enum JoyMoodCatalog {
 
     /// 8 Authentic quick emoji-mood presets requested for rapid selection
     public static let quickPresets: [JoyQuickMood] = [
-        JoyQuickMood(id: "sun",      emoji: "☀️",  title: "Солнце",   step: 3,  color: Color(0xFFF59E0B)),
-        JoyQuickMood(id: "coffee",   emoji: "☕️",  title: "Кофе",     step: 6,  color: Color(0xFFD97706)),
-        JoyQuickMood(id: "smile",    emoji: "😊",  title: "Улыбка",   step: 2,  color: Color(0xFFEC4899)),
-        JoyQuickMood(id: "hug",      emoji: "🫂",  title: "Объятия",  step: 6,  color: Color(0xFF8B5CF6)),
-        JoyQuickMood(id: "nature",   emoji: "🌿",  title: "Природа",  step: 8,  color: Color(0xFF10B981)),
-        JoyQuickMood(id: "sparkle",  emoji: "✨",  title: "Восторг",  step: 1,  color: Color(0xFFFBBF24)),
-        JoyQuickMood(id: "heart",    emoji: "💖",  title: "Тепло",    step: 6,  color: Color(0xFFF43F5E)),
-        JoyQuickMood(id: "blossom",  emoji: "🌸",  title: "Уют",      step: 6,  color: Color(0xFFFB7185))
+        JoyQuickMood(id: "sun",      emoji: "☀️",  title: "Солнце",   step: 3,  color: Color(hex: 0xF59E0B)),
+        JoyQuickMood(id: "coffee",   emoji: "☕️",  title: "Кофе",     step: 6,  color: Color(hex: 0xD97706)),
+        JoyQuickMood(id: "smile",    emoji: "😊",  title: "Улыбка",   step: 2,  color: Color(hex: 0xEC4899)),
+        JoyQuickMood(id: "hug",      emoji: "🫂",  title: "Объятия",  step: 6,  color: Color(hex: 0x8B5CF6)),
+        JoyQuickMood(id: "nature",   emoji: "🌿",  title: "Природа",  step: 8,  color: Color(hex: 0x10B981)),
+        JoyQuickMood(id: "sparkle",  emoji: "✨",  title: "Восторг",  step: 1,  color: Color(hex: 0xFBBF24)),
+        JoyQuickMood(id: "heart",    emoji: "💖",  title: "Тепло",    step: 6,  color: Color(hex: 0xF43F5E)),
+        JoyQuickMood(id: "blossom",  emoji: "🌸",  title: "Уют",      step: 6,  color: Color(hex: 0xFB7185))
     ]
 
     public static func getMood(step: Int) -> JoyMood {

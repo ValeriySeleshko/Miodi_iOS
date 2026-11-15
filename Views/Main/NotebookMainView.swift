@@ -55,7 +55,6 @@ public struct NotebookMainView: View {
     }
 
     private var currentWeekDays: [DayItemModel] {
-        let calendar = Calendar.current
         let today = Date()
         let todayYmd = today.yyyyMMddString
 

@@ -530,27 +530,27 @@ public struct HabitsTrayView: View {
                 }
             } else {
                 // Boolean or Explicitly Frozen/Failed Habit
+                let cellBg: Color = {
+                    if isDone { return theme.currentAccent.primary }
+                    if isFrozen { return isDark ? Color(hex: 0x0C2B3C) : Color(hex: 0xE0F2FE) }
+                    if isFailed { return isDark ? Color(hex: 0x2C1920) : Color(hex: 0xFEE2E2) }
+                    if isPastUnset { return isDark ? Color(hex: 0x161C26) : Color(hex: 0xF1F5F9) }
+                    if day.isToday { return theme.currentAccent.primary.opacity(isDark ? 0.22 : 0.14) }
+                    return isDark ? Color(hex: 0x222C3E) : Color(hex: 0xF1F5F9)
+                }()
+
+                let dayBorderColor: Color = {
+                    if isDone { return theme.currentAccent.primary }
+                    if isFrozen { return Color(hex: 0x38BDF8) }
+                    if isFailed { return Color(hex: 0xEF4444) }
+                    if day.isToday { return theme.currentAccent.primary }
+                    return isDark ? Color(hex: 0x334155) : Color(hex: 0xCBD5E1)
+                }()
+
                 Button {
                     toggleHabitDay(habit: habit, dateStr: day.dateStr)
                 } label: {
                     ZStack {
-                        let cellBg: Color = {
-                            if isDone { return theme.currentAccent.primary }
-                            if isFrozen { return isDark ? Color(hex: 0x0C2B3C) : Color(hex: 0xE0F2FE) }
-                            if isFailed { return isDark ? Color(hex: 0x2C1920) : Color(hex: 0xFEE2E2) }
-                            if isPastUnset { return isDark ? Color(hex: 0x161C26) : Color(hex: 0xF1F5F9) }
-                            if day.isToday { return theme.currentAccent.primary.opacity(isDark ? 0.22 : 0.14) }
-                            return isDark ? Color(hex: 0x222C3E) : Color(hex: 0xF1F5F9)
-                        }()
-
-                        let borderColor: Color = {
-                            if isDone { return theme.currentAccent.primary }
-                            if isFrozen { return Color(hex: 0x38BDF8) }
-                            if isFailed { return Color(hex: 0xEF4444) }
-                            if day.isToday { return theme.currentAccent.primary }
-                            return isDark ? Color(hex: 0x334155) : Color(hex: 0xCBD5E1)
-                        }()
-
                         RoundedRectangle(cornerRadius: 6, style: .continuous)
                             .fill(cellBg)
 
@@ -579,7 +579,7 @@ public struct HabitsTrayView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 6, style: .continuous)
                             .stroke(
-                                borderColor,
+                                dayBorderColor,
                                 style: StrokeStyle(lineWidth: (isDone || day.isToday || isFrozen || isFailed) ? 1.4 : 1, dash: isPastUnset ? [3, 2] : [])
                             )
                     )

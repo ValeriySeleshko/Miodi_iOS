@@ -40,11 +40,11 @@ public struct HabitNumericStepperSheet: View {
         self.onSave = onSave
         self.onDismiss = onDismiss
         _currentValue = State(initialValue: initialValue)
-        _textInput = State(initialValue: formatValue(initialValue))
+        _textInput = State(initialValue: HabitNumericStepperSheet.formatValue(initialValue))
         _selectedStatus = State(initialValue: status)
     }
 
-    private static func formatValue(_ val: Float) -> String {
+    public static func formatValue(_ val: Float) -> String {
         if val.truncatingRemainder(dividingBy: 1) == 0 {
             return String(Int(val))
         } else {

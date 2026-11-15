@@ -508,9 +508,9 @@ public struct JoyAddModalView: View {
             let newJoy = JoyItem(
                 date: targetDate,
                 text: trimmed,
+                orderIndex: 0,
                 mood: moodId,
-                sticker: selectedStickerAsset,
-                orderIndex: 0
+                sticker: selectedStickerAsset
             )
             modelContext.insert(newJoy)
             try? modelContext.save()
