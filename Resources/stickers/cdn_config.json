@@ -1,0 +1,7 @@
+{
+  "repo_owner": "ValeriySeleshko",
+  "repo_name": "miodi-stickers-cdn",
+  "branch": "main",
+  "primary_cdn_url": "https://valeriyseleshko.github.io/miodi-stickers-cdn",
+  "fallback_cdn_url": "https://raw.githubusercontent.com/ValeriySeleshko/miodi-stickers-cdn/main"
+}

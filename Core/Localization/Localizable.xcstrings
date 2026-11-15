@@ -1,0 +1,153 @@
+{
+  "sourceLanguage" : "ru",
+  "strings" : {
+    "app_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miodi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miodi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miodi"
+          }
+        }
+      }
+    },
+    "placeholder_write_task" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a task..."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записать задачу..."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записати завдання..."
+          }
+        }
+      }
+    },
+    "new_task_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Task"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая задача"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нове завдання"
+          }
+        }
+      }
+    },
+    "cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скасувати"
+          }
+        }
+      }
+    },
+    "add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати"
+          }
+        }
+      }
+    },
+    "joy_of_the_day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Joy of the Day" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Радость дня" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Радість дня" } }
+      }
+    },
+    "joy_jar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Joy Jar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Банка радости" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Банка радості" } }
+      }
+    },
+    "joy_goal_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Daily Goal: 3 Joys" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Цель дня: 3 радости" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Мета дня: 3 радості" } }
+      }
+    },
+    "joy_save_btn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save Joy ✨" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сохранить радость ✨" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Зберегти радість ✨" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

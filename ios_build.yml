@@ -1,0 +1,68 @@
+name: Miodi iOS Build & Appetize Simulator
+
+on:
+  push:
+    paths:
+      - 'Plan4U_iOS/**'
+      - '.github/workflows/ios_build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-simulator:
+    name: Build iOS Simulator App
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15 / 16
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        working-directory: Plan4U_iOS
+        run: xcodegen generate
+
+      - name: Build for iOS Simulator
+        working-directory: Plan4U_iOS
+        run: |
+          xcodebuild build \
+            -project Miodi.xcodeproj \
+            -scheme Miodi \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Compress Simulator .app for Appetize.io
+        working-directory: Plan4U_iOS
+        run: |
+          cd build/Build/Products/Release-iphonesimulator
+          zip -r -X ../../../../Miodi_Simulator.zip Miodi.app
+          echo "Simulator build zipped successfully."
+
+      - name: Upload Artifact (Miodi_Simulator.zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Miodi_Simulator
+          path: Miodi_Simulator.zip
+          retention-days: 7
+
+      - name: Optional Upload to Appetize.io
+        if: env.APPETIZE_API_TOKEN != ''
+        env:
+          APPETIZE_API_TOKEN: ${{ secrets.APPETIZE_API_TOKEN }}
+        run: |
+          RESPONSE=$(curl --silent --location \
+            --header "Authorization: Bearer $APPETIZE_API_TOKEN" \
+            --form "file=@Miodi_Simulator.zip" \
+            --form "platform=ios" \
+            https://api.appetize.io/v2/apps)
+          echo "Appetize response: $RESPONSE"
+          PUBLIC_URL=$(echo $RESPONSE | grep -o '"publicURL":"[^"]*' | cut -d'"' -f4)
+          echo "::notice title=Appetize Simulator URL::Run your app in browser: $PUBLIC_URL"
