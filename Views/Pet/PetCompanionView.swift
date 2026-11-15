@@ -96,8 +96,8 @@ public struct PetCompanionView: View {
                             )
                     )
 
-                // 3D pop-out Maine Coon Vector Cat Mascot
-                MaineCoonVectorCatView(
+                // 3D pop-out Hand-Drawn Illustrated Maine Coon Cat Mascot
+                MaineCoonIllustratedCatView(
                     colorScheme: pet.color,
                     isSleeping: pet.isSleeping,
                     isPurring: isPurring,
@@ -105,7 +105,6 @@ public struct PetCompanionView: View {
                 )
                 .frame(width: 72, height: 72)
                 .offset(y: -7)
-                .clipShape(Circle().size(width: 90, height: 90).offset(x: -9, y: -20))
 
                 // Mood Badge (e.g. 🐟 hungry or 💤 sleeping)
                 if pet.mood == .hungry || pet.mood == .sleeping {

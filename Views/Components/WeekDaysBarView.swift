@@ -154,6 +154,15 @@ private struct DayCircleView: View {
                             ? (isDark ? .white : theme.currentAccent.sectionText)
                             : (isWeekend ? (isDark ? Color(hex: 0x64748B) : Color(hex: 0x838A98)) : (isDark ? Color(hex: 0x94A3B8) : Color(hex: 0x3B404D)))
                     )
+
+                // Verified Badge (Green Checkmark when all habits completed)
+                if day.allHabitsDone {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Color(hex: 0x10B981))
+                        .background(Circle().fill(Color.white).padding(1))
+                        .offset(x: 12, y: -12)
+                }
             }
             .frame(width: 34, height: 34)
         }

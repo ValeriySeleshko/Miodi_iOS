@@ -171,26 +171,7 @@ public struct NotebookMainView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Floating Maine Coon Cat Companion
-            if let pet = activePet, currentSection == .tasks {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        PetCompanionView(pet: pet) {
-                            isPetModalOpen = true
-                        }
-                        .padding(.trailing, 16)
-                        .padding(.bottom, 76)
-                    }
-                }
-                .transition(.scale.combined(with: .opacity))
-            }
-
-            // Floating Bottom Controls Bar
-            BottomControlsBarView(currentSection: $currentSection)
-
-            // 3D Notebook Cover Opening Animation Overlay on launch
+            // Floating Maine Coon Cat Companion replaced by 1:1 Floating Controls Bar in Tasks section
             if showCoverOverlay {
                 NotebookCoverOpeningOverlayView(isDarkTheme: isDark) {
                     withAnimation(.easeOut(duration: 0.2)) {
@@ -402,6 +383,51 @@ public struct NotebookMainView: View {
                 )
 
                 VStack(spacing: 0) {
+                    // Top Widgets Bar: Date, Tasks count ring, Streak flame, Stickers sparkle, Settings
+                    let calendar = Calendar.current
+                    let now = Date.from(yyyyMMdd: effectiveSelectedDate) ?? Date()
+                    let dayNum = "\(calendar.component(.day, from: now))"
+                    let dayWk = DateFormatter().shortWeekdaySymbols?[calendar.component(.weekday, from: now) - 1] ?? "пт"
+                    let completedCount = tasks.filter { $0.isCompleted }.count
+                    let totalCount = tasks.count
+
+                    TopWidgetsBarView(
+                        dayNumber: dayNum,
+                        dayOfWeek: dayWk,
+                        completedTasks: completedCount,
+                        totalTasks: totalCount,
+                        streakCount: activePet?.streakDays ?? 0,
+                        onDateClick: { isShowingMonthCalendar = true },
+                        onTasksClick: { isShowingMonthCalendar = true },
+                        onStreakClick: { isAchievementsOpen = true },
+                        onStickersClick: { isStickersModalOpen = true },
+                        onSettingsClick: { currentSection = .settings }
+                    )
+
+                    // Week Days Bar
+                    WeekDaysBarView(
+                        days: currentWeekDays,
+                        isDrawerExpanded: isHabitsTrayExpanded,
+                        onSelectDay: { selectedDay in
+                            selectedDateStr = selectedDay.dateStr
+                        },
+                        onAddHabitClick: {
+                            isShowingCreateHabit = true
+                        },
+                        onToggleDrawer: {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+                                isHabitsTrayExpanded.toggle()
+                            }
+                        }
+                    )
+                    .background(isDark ? MiodiStaticColors.darkTopBarBg : Color(hex: 0xF7F7F8))
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundStyle(isDark ? MiodiStaticColors.darkTopBarBorder : MiodiStaticColors.ruledLineColor),
+                        alignment: .bottom
+                    )
+
                     // Folder Tabs Row with complete context menu & reordering
                     FolderTabsRowView(
                         tabs: folderTabs,
@@ -442,130 +468,62 @@ public struct NotebookMainView: View {
                         }
                     )
 
-                    // Calendar, Stickers & Mode Switcher Bar
-                    HStack {
-                        Button {
-                            MiodiHapticFeedback.lightClick()
-                            isShowingMonthCalendar = true
-                        } label: {
-                            HStack(spacing: 5) {
-                                Text("🗓️")
-                                    .font(.system(size: 13))
-                                Text("Календарь")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(theme.currentAccent.primary)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(theme.currentAccent.primary.opacity(isDark ? 0.22 : 0.12))
-                            )
-                        }
-                        .buttonStyle(.plain)
-
-                        // Stickers Catalog Button
-                        Button {
-                            MiodiHapticFeedback.lightClick()
-                            isStickersModalOpen = true
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text("✨")
-                                    .font(.system(size: 13))
-                                Text("Стикеры")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(theme.currentAccent.primary)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(theme.currentAccent.primary.opacity(isDark ? 0.22 : 0.12))
-                            )
-                        }
-                        .buttonStyle(.plain)
-
-                        Spacer()
-
                     // Mode Switcher: Список / Таймлайн 06-24
-                    HStack(spacing: 2) {
-                        Button {
-                            MiodiHapticFeedback.selection()
-                            withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
-                                isTimelineMode = false
+                    HStack {
+                        Spacer()
+                        HStack(spacing: 2) {
+                            Button {
+                                MiodiHapticFeedback.selection()
+                                withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
+                                    isTimelineMode = false
+                                }
+                            } label: {
+                                HStack(spacing: 3) {
+                                    Text("📋")
+                                        .font(.system(size: 11))
+                                    Text("Список")
+                                        .font(.system(size: 11, weight: !isTimelineMode ? .bold : .medium))
+                                }
+                                .foregroundStyle(!isTimelineMode ? .white : (isDark ? MiodiStaticColors.darkTextSecondary : Color(hex: 0x64748B)))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(!isTimelineMode ? theme.currentAccent.primary : Color.clear)
+                                    )
                             }
-                        } label: {
-                            HStack(spacing: 3) {
-                                Text("📋")
-                                    .font(.system(size: 11))
-                                Text("Список")
-                                    .font(.system(size: 11, weight: !isTimelineMode ? .bold : .medium))
-                            }
-                            .foregroundStyle(!isTimelineMode ? .white : (isDark ? MiodiStaticColors.darkTextSecondary : Color(hex: 0x64748B)))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(!isTimelineMode ? theme.currentAccent.primary : Color.clear)
-                            )
-                        }
-                        .buttonStyle(.plain)
+                            .buttonStyle(.plain)
 
-                        Button {
-                            MiodiHapticFeedback.selection()
-                            withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
-                                isTimelineMode = true
+                            Button {
+                                MiodiHapticFeedback.selection()
+                                withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
+                                    isTimelineMode = true
+                                }
+                            } label: {
+                                HStack(spacing: 3) {
+                                    Text("⏱️")
+                                        .font(.system(size: 11))
+                                    Text("06-24")
+                                        .font(.system(size: 11, weight: isTimelineMode ? .bold : .medium))
+                                }
+                                .foregroundStyle(isTimelineMode ? .white : (isDark ? MiodiStaticColors.darkTextSecondary : Color(hex: 0x64748B)))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(isTimelineMode ? theme.currentAccent.primary : Color.clear)
+                                )
                             }
-                        } label: {
-                            HStack(spacing: 3) {
-                                Text("⏱️")
-                                    .font(.system(size: 11))
-                                Text("06-24")
-                                    .font(.system(size: 11, weight: isTimelineMode ? .bold : .medium))
-                            }
-                            .foregroundStyle(isTimelineMode ? .white : (isDark ? MiodiStaticColors.darkTextSecondary : Color(hex: 0x64748B)))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(isTimelineMode ? theme.currentAccent.primary : Color.clear)
-                            )
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
+                        .padding(2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isDark ? Color(hex: 0x1E2433) : Color(hex: 0xF1F5F9))
+                        )
                     }
-                    .padding(2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(isDark ? Color(hex: 0x1E2433) : Color(hex: 0xF1F5F9))
-                    )
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 4)
-                .background(isDark ? MiodiStaticColors.darkTopBarBg : Color(hex: 0xFAFBFD))
-
-                // Week Days Bar
-                WeekDaysBarView(
-                    days: currentWeekDays,
-                    isDrawerExpanded: isHabitsTrayExpanded,
-                    onSelectDay: { selectedDay in
-                        selectedDateStr = selectedDay.dateStr
-                    },
-                    onAddHabitClick: {
-                        isShowingCreateHabit = true
-                    },
-                    onToggleDrawer: {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
-                            isHabitsTrayExpanded.toggle()
-                        }
-                    }
-                )
-                .background(isDark ? MiodiStaticColors.darkTopBarBg : Color(hex: 0xF7F7F8))
-                .overlay(
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundStyle(isDark ? MiodiStaticColors.darkTopBarBorder : MiodiStaticColors.ruledLineColor),
-                    alignment: .bottom
-                )
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 2)
 
                 if isTimelineMode {
                     DayTimelineView(
@@ -627,9 +585,21 @@ public struct NotebookMainView: View {
                 }
             }
 
-            // Interactive Bottom Habits Substrate Tray (under tasks)
-            HabitsTrayView(isExpanded: $isHabitsTrayExpanded)
-                .padding(.bottom, 74)
+            // Interactive Bottom Habits Substrate Tray (when expanded)
+            if isHabitsTrayExpanded {
+                HabitsTrayView(isExpanded: $isHabitsTrayExpanded)
+                    .padding(.bottom, 80)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            // Floating Controls Bar: Speech Bubble, + Button, ✨ Stickers, 3D Mascot Avatar
+            MiodiFloatingControlsView(
+                catMessage: activePet?.currentQuote ?? "Привет, друг! Мяу! Готов планировать великие свершения? ✨",
+                pet: activePet,
+                onAddClick: { isAddingTask = true },
+                onStickersClick: { isStickersModalOpen = true },
+                onPetClick: { isPetModalOpen = true }
+            )
         }
     }
 }

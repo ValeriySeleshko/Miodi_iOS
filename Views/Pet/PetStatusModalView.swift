@@ -273,13 +273,13 @@ public struct PetStatusModalView: View {
 
             // Cat Vector with Petting Zones
             ZStack {
-                MaineCoonVectorCatView(
+                MaineCoonIllustratedCatView(
                     colorScheme: pet.color,
                     isSleeping: pet.isSleeping,
                     isPurring: isPurring,
                     isEating: isEating
                 )
-                .frame(width: 190, height: 190)
+                .frame(width: 220, height: 220)
 
                 // Laser mini-game red dot
                 if isLaserGameActive {
