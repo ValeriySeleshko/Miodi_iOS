@@ -107,6 +107,11 @@ private struct KotlinRandom {
         let val = next(bits: 24)
         return CGFloat(Float(val) / Float(1 << 24))
     }
+
+    mutating func nextDouble(from lower: Double, until upper: Double) -> Double {
+        let f = Double(nextFloat())
+        return lower + f * (upper - lower)
+    }
 }
 
 /// Java String.hashCode() replica for 100% cross-platform deterministic seed matching
@@ -1206,8 +1211,8 @@ public struct ArchiveJoyStamp: View {
     }
 
     private var naturalAngle: Double {
-        let hash = date.hashValue
-        let rnd = KotlinRandom(seed: Int64(abs(hash) + 109))
+        let hash = Int32(truncatingIfNeeded: date.hashValue)
+        var rnd = KotlinRandom(seed: abs(hash) &+ 109)
         return rnd.nextDouble(from: -4.0, until: 4.0)
     }
 

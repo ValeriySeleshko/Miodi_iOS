@@ -99,6 +99,10 @@ public enum TaskPriorityColors {
         return all.first { $0.id == id } ?? black
     }
 
+    public static func color(for id: String?) -> Color {
+        return fromId(id).circleColor
+    }
+
     public static func getTextColor(_ id: String?, isDarkTheme: Bool) -> Color {
         let item = fromId(id)
         return isDarkTheme ? item.darkTextColor : item.lightTextColor

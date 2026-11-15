@@ -440,7 +440,7 @@ public struct FullMonthCalendarView: View {
             if isDiaryMode { return false }
             let cal = calendar
             guard let cellDate = Date.from(yyyyMMdd: dateStr) else { return false }
-            let dow = cal.component(.weekday, cellDate)
+            let dow = cal.component(.weekday, from: cellDate)
             let standardDow = (dow == 1) ? 7 : (dow - 1)
             let scheduledHabits = habits.filter { h in
                 switch h.scheduleType {

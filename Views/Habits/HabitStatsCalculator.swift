@@ -114,7 +114,6 @@ public enum HabitStatsCalculator {
     ) -> HabitStats {
         let calendar = Calendar.current
         let today = Date()
-        let todayStr = isoFormatter.string(from: today)
 
         // Map entries by date for fast lookup
         let entryMap = Dictionary(entries.filter { $0.habitId == habit.id }.map { ($0.date, $0) }, uniquingKeysWith: { a, _ in a })

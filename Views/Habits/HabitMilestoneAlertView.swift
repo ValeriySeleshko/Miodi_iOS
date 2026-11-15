@@ -157,7 +157,7 @@ public struct HabitMilestoneAlertView: View {
                 // Tier Pill
                 let pillColor = milestone.badgeGradient.first ?? theme.currentAccent.primary
                 Text(milestone.tierName.uppercased())
-                    .font(.system(size: 10.5, weight: .extrabold))
+                    .font(.system(size: 10.5, weight: .black))
                     .tracking(1.2)
                     .foregroundStyle(pillColor)
                     .padding(.horizontal, 12)

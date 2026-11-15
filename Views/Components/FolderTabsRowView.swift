@@ -198,7 +198,8 @@ public struct FolderTabsRowView: View {
                     .font(.system(size: 9.5, weight: .bold))
                     .foregroundStyle(Color.white)
                     .padding(.horizontal, 4.5)
-                    .frame(minWidth: 16, height: 16)
+                    .frame(minWidth: 16)
+                    .frame(height: 16)
                     .background(
                         Capsule().fill(
                             (isActive || isDragging)
