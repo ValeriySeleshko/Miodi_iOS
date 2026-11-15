@@ -537,7 +537,7 @@ public struct ClinicalCycleSummary: Sendable {
             let cur = cycles[i]
             let next = cycles[i + 1]
             let len = abs(CycleEngine.diffInDays(start: cur.startDate, end: next.startDate))
-            if len in 15...90 {
+            if (15...90).contains(len) {
                 if cur.isOutlier {
                     outliers += 1
                 } else {
@@ -549,7 +549,7 @@ public struct ClinicalCycleSummary: Sendable {
         for c in cycles {
             if let end = c.endDate {
                 let pLen = CycleEngine.diffInDays(start: c.startDate, end: end) + 1
-                if pLen in 1...14 {
+                if (1...14).contains(pLen) {
                     periodLengths.append(pLen)
                 }
             }

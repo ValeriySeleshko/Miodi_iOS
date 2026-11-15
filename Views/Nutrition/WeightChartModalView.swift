@@ -495,7 +495,7 @@ public struct WeightChartModalView: View {
     }
 
     private func saveWeight() {
-        guard let w = Double(inputWeightStr.replacingOccurrences(of: ",", with: ".")), w in 20...250 else { return }
+        guard let w = Double(inputWeightStr.replacingOccurrences(of: ",", with: ".")), (20.0...250.0).contains(w) else { return }
         let dateStr = selectedDate.yyyyMMddString
 
         // Replace or insert
