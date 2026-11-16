@@ -20,6 +20,7 @@ public final class TaskItem {
     public var priorityColor: String // black, burgundy, purple, navy, darkgreen
     public var completedAt: Int64
     public var reminderTime: String?
+    public var reminderOffset: Int = 0 // offset in minutes before event: 0 = at event time, 15 = 15m before, etc.
     public var notes: String?
     public var photoUri: String?
     public var orderIndex: Int
@@ -38,6 +39,7 @@ public final class TaskItem {
         priorityColor: String = "black",
         completedAt: Int64 = 0,
         reminderTime: String? = nil,
+        reminderOffset: Int = 0,
         notes: String? = nil,
         photoUri: String? = nil,
         orderIndex: Int = 0,
@@ -55,6 +57,7 @@ public final class TaskItem {
         self.priorityColor = priorityColor
         self.completedAt = completedAt
         self.reminderTime = reminderTime
+        self.reminderOffset = reminderOffset
         self.notes = notes
         self.photoUri = photoUri
         self.orderIndex = orderIndex

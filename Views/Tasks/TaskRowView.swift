@@ -609,8 +609,13 @@ public struct TaskRowView: View {
         task.isCompleted.toggle()
         if task.isCompleted {
             task.completedAt = Int64(Date().timeIntervalSince1970 * 1000)
+            NotificationService.shared.cancelTaskReminder(task: task)
             MiodiHapticFeedback.taskComplete()
         } else {
+            task.completedAt = 0
+            if task.reminderTime != nil {
+                NotificationService.shared.scheduleTaskReminder(task: task)
+            }
             MiodiHapticFeedback.lightClick()
         }
         onToggle()

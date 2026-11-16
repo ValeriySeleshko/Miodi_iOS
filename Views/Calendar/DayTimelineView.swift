@@ -127,16 +127,21 @@ public struct DayTimelineView: View {
             TaskDetailModalView(
                 task: taskToEdit,
                 onDismiss: { editingTask = nil },
-                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, notes, photoUri in
+                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, reminderOffset, notes, photoUri in
                     taskToEdit.text = text
                     taskToEdit.sectionId = sectionId
                     taskToEdit.date = date
                     taskToEdit.priority = priority
                     taskToEdit.priorityColor = priorityColor
                     taskToEdit.reminderTime = reminderTime
+                    taskToEdit.reminderOffset = reminderOffset
                     taskToEdit.notes = notes
                     taskToEdit.photoUri = photoUri
                     try? modelContext.save()
+                    NotificationService.shared.cancelTaskReminder(task: taskToEdit)
+                    if !taskToEdit.isCompleted && taskToEdit.reminderTime != nil {
+                        NotificationService.shared.scheduleTaskReminder(task: taskToEdit)
+                    }
                     editingTask = nil
                 }
             )
@@ -414,9 +419,13 @@ public struct DayTimelineView: View {
                     task.isCompleted.toggle()
                     if task.isCompleted {
                         task.completedAt = Int64(Date().timeIntervalSince1970 * 1000)
+                        NotificationService.shared.cancelTaskReminder(task: task)
                         MiodiHapticFeedback.taskComplete()
                     } else {
                         task.completedAt = 0
+                        if task.reminderTime != nil {
+                            NotificationService.shared.scheduleTaskReminder(task: task)
+                        }
                         MiodiHapticFeedback.lightClick()
                     }
                     try? modelContext.save()

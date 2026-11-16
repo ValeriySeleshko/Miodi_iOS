@@ -196,7 +196,7 @@ public struct NotebookMainView: View {
                 onDismiss: {
                     isAddingTask = false
                 },
-                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, notes, photoUri in
+                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, reminderOffset, notes, photoUri in
                     let newTask = TaskItem(
                         sectionId: sectionId,
                         text: text,
@@ -204,12 +204,14 @@ public struct NotebookMainView: View {
                         priority: priority,
                         priorityColor: priorityColor,
                         reminderTime: reminderTime,
+                        reminderOffset: reminderOffset,
                         notes: notes,
                         photoUri: photoUri,
                         orderIndex: tasks.count
                     )
                     modelContext.insert(newTask)
                     try? modelContext.save()
+                    NotificationService.shared.scheduleTaskReminder(task: newTask)
                     isAddingTask = false
                 }
             )
@@ -220,16 +222,21 @@ public struct NotebookMainView: View {
                 onDismiss: {
                     editingTask = nil
                 },
-                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, notes, photoUri in
+                onSave: { text, sectionId, date, priority, priorityColor, reminderTime, reminderOffset, notes, photoUri in
                     taskToEdit.text = text
                     taskToEdit.sectionId = sectionId
                     taskToEdit.date = date
                     taskToEdit.priority = priority
                     taskToEdit.priorityColor = priorityColor
                     taskToEdit.reminderTime = reminderTime
+                    taskToEdit.reminderOffset = reminderOffset
                     taskToEdit.notes = notes
                     taskToEdit.photoUri = photoUri
                     try? modelContext.save()
+                    NotificationService.shared.cancelTaskReminder(task: taskToEdit)
+                    if !taskToEdit.isCompleted && taskToEdit.reminderTime != nil {
+                        NotificationService.shared.scheduleTaskReminder(task: taskToEdit)
+                    }
                     editingTask = nil
                 }
             )

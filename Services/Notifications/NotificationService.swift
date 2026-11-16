@@ -31,16 +31,38 @@ public final class NotificationService {
               let hour = Int(parts[0]),
               let minute = Int(parts[1]) else { return }
 
+        let calendar = Calendar.current
+        var baseDate = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if !task.date.isEmpty, let d = formatter.date(from: task.date) {
+            baseDate = d
+        }
+
+        var comps = calendar.dateComponents([.year, .month, .day], from: baseDate)
+        comps.hour = hour
+        comps.minute = minute
+        comps.second = 0
+
+        guard var scheduledDate = calendar.date(from: comps) else { return }
+
+        if task.reminderOffset > 0 {
+            scheduledDate = scheduledDate.addingTimeInterval(-Double(task.reminderOffset * 60))
+        }
+
+        guard scheduledDate > Date() else { return } // Already in past
+
         let content = UNMutableNotificationContent()
         content.title = "Miodi"
-        content.body = task.text
+        if task.reminderOffset > 0 {
+            content.body = "\(task.text) (в \(timeStr))"
+        } else {
+            content.body = task.text
+        }
         content.sound = .default
 
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = minute
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let triggerComps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: scheduledDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComps, repeats: false)
         let request = UNNotificationRequest(identifier: "task_\(task.id)", content: content, trigger: trigger)
 
         UNUserNotificationCenter.current().add(request)

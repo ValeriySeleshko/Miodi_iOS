@@ -41,4 +41,12 @@ public final class MomentItem {
         self.yOffsetDp = yOffsetDp
         self.timestamp = timestamp
     }
+
+    public func displayDateString(showWeekday: Bool = false, languageCode: String = "ru") -> String {
+        let cleanDate = date.components(separatedBy: "#").first ?? date
+        if showWeekday {
+            return Date.formatMomentDateWithWeekday(cleanDate, languageCode: languageCode)
+        }
+        return Date.formatDigitalDate(cleanDate, languageCode: languageCode)
+    }
 }

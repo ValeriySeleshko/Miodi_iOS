@@ -36,6 +36,7 @@ public struct TaskDetailModalView: View {
     public var initialPriority: Int
     public var initialPriorityColor: String
     public var initialTime: String?
+    public var initialReminderOffset: Int = 0
     public var initialNotes: String
     public var initialPhotoUri: String?
 
@@ -48,6 +49,7 @@ public struct TaskDetailModalView: View {
         _ priority: Int,
         _ priorityColor: String,
         _ reminderTime: String?,
+        _ reminderOffset: Int,
         _ notes: String,
         _ photoUri: String?
     ) -> Void
@@ -58,6 +60,7 @@ public struct TaskDetailModalView: View {
         _ priority: Int,
         _ priorityColor: String,
         _ reminderTime: String?,
+        _ reminderOffset: Int,
         _ notes: String,
         _ photoUri: String?
     ) -> Void)?
@@ -74,6 +77,10 @@ public struct TaskDetailModalView: View {
     @State private var selectedPriority: Int
     @State private var selectedPriorityColor: String
     @State private var reminderTime: String?
+    @State private var reminderOffset: Int
+    @State private var isShowingCustomOffsetSheet: Bool = false
+    @State private var customOffsetValueText: String = "30"
+    @State private var customOffsetUnitIndex: Int = 0
     @State private var isShowingTimePicker: Bool = false
     @State private var pickerTime: Date = Date()
     @State private var notesText: String
@@ -88,11 +95,12 @@ public struct TaskDetailModalView: View {
         initialPriority: Int = 0,
         initialPriorityColor: String = "black",
         initialTime: String? = nil,
+        initialReminderOffset: Int = 0,
         initialNotes: String = "",
         initialPhotoUri: String? = nil,
         onDismiss: @escaping () -> Void = {},
-        onAutoSave: ((String, String, String, Int, String, String?, String, String?) -> Void)? = nil,
-        onSave: @escaping (String, String, String, Int, String, String?, String, String?) -> Void
+        onAutoSave: ((String, String, String, Int, String, String?, Int, String, String?) -> Void)? = nil,
+        onSave: @escaping (String, String, String, Int, String, String?, Int, String, String?) -> Void
     ) {
         self.task = task
         self.sections = sections.isEmpty ? TaskDetailModalView.defaultSections : sections
@@ -102,6 +110,7 @@ public struct TaskDetailModalView: View {
         let effectivePrio = task?.priority ?? initialPriority
         let effectiveColor = task?.priorityColor.isEmpty == false ? task!.priorityColor : initialPriorityColor
         let effectiveTime = task?.reminderTime ?? initialTime
+        let effectiveOffset = task?.reminderOffset ?? initialReminderOffset
         let effectiveNotes = task?.notes ?? initialNotes
         let effectivePhotos = task?.photoUri ?? initialPhotoUri
 
@@ -111,6 +120,7 @@ public struct TaskDetailModalView: View {
         self.initialPriority = effectivePrio
         self.initialPriorityColor = effectiveColor
         self.initialTime = effectiveTime
+        self.initialReminderOffset = effectiveOffset
         self.initialNotes = effectiveNotes
         self.initialPhotoUri = effectivePhotos
 
@@ -124,6 +134,7 @@ public struct TaskDetailModalView: View {
         _selectedPriority = State(initialValue: effectivePrio)
         _selectedPriorityColor = State(initialValue: effectiveColor)
         _reminderTime = State(initialValue: effectiveTime)
+        _reminderOffset = State(initialValue: effectiveOffset)
         _notesText = State(initialValue: effectiveNotes)
         _attachedPhotos = State(initialValue: TaskPhotoStorage.parsePhotoUris(effectivePhotos))
     }
@@ -504,10 +515,35 @@ public struct TaskDetailModalView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Event Timing & Offset Calculation
+    private var eventTimestamp: Date? {
+        guard let timeStr = reminderTime, !timeStr.isEmpty else { return nil }
+        let parts = timeStr.split(separator: ":")
+        guard parts.count == 2,
+              let hour = Int(parts[0]),
+              let minute = Int(parts[1]) else { return nil }
+        var comps = Calendar.current.dateComponents([.year, .month, .day], from: selectedDate)
+        comps.hour = hour
+        comps.minute = minute
+        comps.second = 0
+        return Calendar.current.date(from: comps)
+    }
+
+    private var isEventInPast: Bool {
+        guard let eventDate = eventTimestamp else { return false }
+        return eventDate <= Date()
+    }
+
+    private var minutesUntilEvent: Int? {
+        guard let eventDate = eventTimestamp, !isEventInPast else { return nil }
+        let diff = eventDate.timeIntervalSince(Date())
+        return max(0, Int(diff / 60))
+    }
+
     // MARK: - Card 5: Reminder Time Picker (Only on Important)
     private var reminderTimeCard: some View {
-        fieldCard(title: "Время напоминания") {
-            VStack(alignment: .leading, spacing: 8) {
+        fieldCard(title: "⏰ Время события / напоминание") {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
                     // Display & picker trigger
                     Button {
@@ -532,7 +568,7 @@ public struct TaskDetailModalView: View {
                                 .fill(isDarkTheme ? Color(hex: 0x1E2433) : Color.white)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(isDarkTheme ? Color(hex: 0x384256) : Color(hex: 0xE5E7EB), lineWidth: 1)
+                                        .stroke(isEventInPast ? Color(hex: 0xEF4444) : (isDarkTheme ? Color(hex: 0x384256) : Color(hex: 0xE5E7EB)), lineWidth: 1)
                                 )
                         )
                     }
@@ -543,6 +579,7 @@ public struct TaskDetailModalView: View {
                         Button {
                             MiodiHapticFeedback.lightClick()
                             reminderTime = nil
+                            reminderOffset = 0
                             triggerAutoSave()
                         } label: {
                             Text("Сброс")
@@ -593,10 +630,186 @@ public struct TaskDetailModalView: View {
                     }
                 }
 
-                Text("Уведомление поступит в назначенное время")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color(hex: 0xE11D48))
+                if let timeStr = reminderTime {
+                    if isEventInPast {
+                        HStack(spacing: 6) {
+                            Text("⚠️ Время события (\(timeStr)) уже прошло. Напоминание установить нельзя.")
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(Color(hex: 0xE11D48))
+                        }
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(hex: 0xE11D48).opacity(0.1))
+                        )
+                    } else {
+                        // Offset selection section
+                        Text("Напомнить до события:")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(isDarkTheme ? Color(hex: 0x94A3B8) : Color(hex: 0x6B7280))
+
+                        let standardOffsets: [(Int, String)] = [
+                            (0, "Вовремя"),
+                            (5, "За 5 мин"),
+                            (15, "За 15 мин"),
+                            (30, "За 30 мин"),
+                            (60, "За 1 ч"),
+                            (120, "За 2 ч"),
+                            (1440, "За 1 дн")
+                        ]
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(standardOffsets, id: \.0) { offsetMins, label in
+                                    let isAllowed = offsetMins == 0 || (minutesUntilEvent != nil && offsetMins < minutesUntilEvent!)
+                                    let isSelected = reminderOffset == offsetMins
+
+                                    Button {
+                                        MiodiHapticFeedback.selection()
+                                        reminderOffset = offsetMins
+                                        triggerAutoSave()
+                                    } label: {
+                                        Text(label)
+                                            .font(.system(size: 12, weight: isSelected ? .bold : .medium))
+                                            .foregroundStyle(
+                                                !isAllowed ? Color(hex: 0x9CA3AF).opacity(0.5) :
+                                                (isSelected ? Color.white : (isDarkTheme ? Color(hex: 0xCBD5E1) : Color(hex: 0x4B5563)))
+                                            )
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .fill(
+                                                        !isAllowed ? (isDarkTheme ? Color(hex: 0x1E2433).opacity(0.35) : Color(hex: 0xF3F4F6).opacity(0.5)) :
+                                                        (isSelected ? theme.currentAccent.primary : (isDarkTheme ? Color(hex: 0x1E2433) : Color(hex: 0xF3F4F6)))
+                                                    )
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                    .disabled(!isAllowed)
+                                }
+
+                                // Custom offset chip
+                                let isCustom = reminderOffset > 0 && standardOffsets.allSatisfy { $0.0 != reminderOffset }
+                                let customLabel: String = {
+                                    if isCustom {
+                                        if reminderOffset % 1440 == 0 { return "За \(reminderOffset / 1440) дн ✓" }
+                                        if reminderOffset % 60 == 0 { return "За \(reminderOffset / 60) ч ✓" }
+                                        return "За \(reminderOffset) мин ✓"
+                                    }
+                                    return "+ Своё"
+                                }()
+
+                                Button {
+                                    MiodiHapticFeedback.selection()
+                                    isShowingCustomOffsetSheet = true
+                                } label: {
+                                    Text(customLabel)
+                                        .font(.system(size: 12, weight: isCustom ? .bold : .medium))
+                                        .foregroundStyle(isCustom ? Color.white : (isDarkTheme ? Color(hex: 0xCBD5E1) : Color(hex: 0x4B5563)))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(isCustom ? theme.currentAccent.primary : (isDarkTheme ? Color(hex: 0x1E2433) : Color(hex: 0xF3F4F6)))
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        // Trigger info text
+                        if reminderOffset == 0 {
+                            Text("🔔 Напоминание придет в \(timeStr) (в момент события)")
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(isDarkTheme ? Color(hex: 0x38BDF8) : Color(hex: 0x0284C7))
+                        } else if let eventDate = eventTimestamp {
+                            let triggerDate = eventDate.addingTimeInterval(-Double(reminderOffset * 60))
+                            let isSameDay = Calendar.current.isDate(triggerDate, inSameDayAs: Date())
+                            let timePart = triggerDate.timeStringHHmm
+                            let whenStr = isSameDay ? "сегодня в \(timePart)" : triggerDate.formatted(date: .abbreviated, time: .shortened)
+                            let offsetStr = reminderOffset % 1440 == 0 ? "\(reminderOffset / 1440) дн." : (reminderOffset % 60 == 0 ? "\(reminderOffset / 60) ч." : "\(reminderOffset) мин.")
+
+                            Text("🔔 Напоминание придет: \(whenStr) (за \(offsetStr) до события)")
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(isDarkTheme ? Color(hex: 0x38BDF8) : Color(hex: 0x0284C7))
+                        }
+                    }
+                } else {
+                    Text("Уведомление поступит в назначенное время")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(hex: 0xE11D48))
+                }
             }
+        }
+        .sheet(isPresented: $isShowingCustomOffsetSheet) {
+            customOffsetSheetView
+        }
+    }
+
+    private var customOffsetSheetView: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Свое время напоминания")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(isDarkTheme ? Color(hex: 0xF1F5F9) : Color(hex: 0x1E2229))
+                    .padding(.top, 16)
+
+                HStack(spacing: 12) {
+                    TextField("30", text: $customOffsetValueText)
+                        .keyboardType(.numberPad)
+                        .font(.system(size: 18, weight: .semibold))
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(isDarkTheme ? Color(hex: 0x1E2433) : Color(hex: 0xF3F4F6))
+                        )
+                        .frame(width: 90)
+
+                    Picker("Единица", selection: $customOffsetUnitIndex) {
+                        Text("минут").tag(0)
+                        Text("часов").tag(1)
+                        Text("дней").tag(2)
+                    }
+                    .pickerStyle(.segmented)
+                }
+                .padding(.horizontal, 20)
+
+                let mult = (customOffsetUnitIndex == 0 ? 1 : (customOffsetUnitIndex == 1 ? 60 : 1440))
+                let val = (Int(customOffsetValueText) ?? 0) * mult
+                let isTooLong = minutesUntilEvent != nil && val >= minutesUntilEvent!
+                let isValid = val > 0 && !isTooLong
+
+                if isTooLong {
+                    Text("До события осталось меньше времени (\(minutesUntilEvent ?? 0) мин)")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color(hex: 0xEF4444))
+                        .padding(.horizontal, 20)
+                }
+
+                Spacer()
+
+                HStack(spacing: 12) {
+                    Button("Отмена") {
+                        isShowingCustomOffsetSheet = false
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+
+                    Button("Применить") {
+                        reminderOffset = val
+                        isShowingCustomOffsetSheet = false
+                        triggerAutoSave()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!isValid)
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .presentationDetents([.height(260)])
         }
     }
 
@@ -747,6 +960,7 @@ public struct TaskDetailModalView: View {
             selectedPriority,
             selectedPriorityColor,
             selectedPriority == 1 ? reminderTime : nil,
+            selectedPriority == 1 && reminderTime != nil ? reminderOffset : 0,
             notesText,
             photoUriString
         )
@@ -766,6 +980,7 @@ public struct TaskDetailModalView: View {
             selectedPriority,
             selectedPriorityColor,
             selectedPriority == 1 ? reminderTime : nil,
+            selectedPriority == 1 && reminderTime != nil ? reminderOffset : 0,
             notesText,
             photoUriString
         )
